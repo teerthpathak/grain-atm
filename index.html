@@ -18,7 +18,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="index.html">Grain ATM</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button title="hamburger" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -59,8 +59,8 @@
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
                         <h4 class="card-title">Update Price</h4>
-                        <input type="number" class="form-control my-3" placeholder="Enter Price Per Kg"
-                            id="updatePriceInput" style="text-align: center;">
+                        <input type="number" class="form-control my-3 text-center" placeholder="Enter Price Per Kg"
+                            id="updatePriceInput">
                         <label class="message">Enter A Value Between 0 To 325</label>
                         <button class="btn btn-dark w-100" onclick="update()">Update</button>
                     </div>
@@ -123,23 +123,31 @@
             }
 
             firebase.database().ref("/transaction").on("value", (snapshot) => {
-                let i = 1;
+            setTimeout(() => {
                 document.getElementById("tb").innerHTML = "";
 
-                snapshot.forEach((childSnapshot) => {
-                    getFirebaseData(`/transaction/${childSnapshot.key}`).then(data => {
+                let obj = snapshot.val()
+                let objKeys = Object.keys(obj);
+                let objLen = objKeys.length;
+                let counter = 1;
+                for (let i = objLen; i >= 0; i--) {
+
+                    if (i != objLen) {
+                        let data = obj[objKeys[i]];
+
                         document.getElementById("tb").innerHTML += `<tr>
-                                                                    <td>${i}</td>
-                                                                    <td>${data["date"]}</td>
-                                                                    <td>${data["time"]}</td>
-                                                                    <td>${data["amount"] / data["weight"]}</td>
-                                                                    <td>${data["weight"] / 100}</td>
-                                                                    <td>${data["amount"] / 100}</td>
-                                                                </tr>`;
-                        i += 1;
-                    });
-                });
-            });
+                                                                        <td>${counter}</td>
+                                                                        <td>${data["date"]}</td>
+                                                                        <td>${data["time"]}</td>
+                                                                        <td>${data["amount"] / data["weight"]}</td>
+                                                                        <td>${data["weight"] / 100}</td>
+                                                                        <td>${data["amount"] / 100}</td>
+                                                                    </tr>`;
+                        counter++;
+                    }
+                }
+            }, 100);
+        });
         </script>
 </body>
 

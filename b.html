@@ -13,7 +13,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="index.html">Grain ATM</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button title="hamburger" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -34,13 +34,13 @@
             <button class="btn btn-success" onclick="confirmPayment();">Confirm Payment</button>
         </div>
         <div class="row g-4 mt-1">
-            <label id="message" style="text-align: center;"></label>
+            <label id="message" class="text-center"></label>
         </div>
         <div class="row g-4 mt-3">
             <button class="btn btn-danger" onclick="toggleWifi();">Toggle Wifi</button>
         </div>
         <div class="row g-4 mt-1">
-            <label id="message2" style="text-align: center;"></label>
+            <label id="message2" class="text-center"></label>
         </div>
     </div>
 
@@ -55,18 +55,46 @@
             document.getElementById("message").style.color = "blue";
             document.getElementById("message").innerText = "Please Wait.";
             setFirebaseData("/control", "paid", 1);
+
+            let d = new Date();
+
+            let DD = `${d.getDate()}`;
+            let MM = `${d.getMonth() + 1}`;
+            let YYYY = `${d.getFullYear()}`;
+
+            let HH = `${d.getHours()}`;
+            let MIN = `${d.getMinutes()}`;
+            let SS = `${d.getSeconds()}`;
+
             setTimeout(() => {
                 setFirebaseData("/control", "paid", 0);
                 getFirebaseData("/control/temp").then(data => {
-                    let d = new Date();
-
                     let amount = data["a"];
                     let weight = data["w"];
 
-                    let date = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
-                    let time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+                    if (DD[1] == undefined) {
+                        DD = "0" + DD[0];
+                    }
 
-                    let id = date + "_" + time + "_" + amount + "_" + weight;
+                    if (MM[1] == undefined) {
+                        MM = "0" + MM[0];
+                    }
+
+                    if (HH[1] == undefined) {
+                        HH = "0" + HH[0];
+                    }
+
+                    if (MIN[1] == undefined) {
+                        MIN = "0" + MIN[0];
+                    }
+                    if (SS[1] == undefined) {
+                        SS = "0" + SS[0];
+                    }
+
+                    let date = DD + "-" + MM + "-" + YYYY;
+                    let time = HH + ":" + MIN + ":" + SS;
+
+                    let id = YYYY + MM + DD + "_" + HH + MIN + SS + "_" + amount + "_" + weight;
 
                     setFirebaseData(`/transaction/${id}`, "date", date);
                     setFirebaseData(`/transaction/${id}`, "time", time);
@@ -85,17 +113,18 @@
                 });
             }, 10000);
         }
+
         function toggleWifi() {
             getFirebaseData("/control/wifi").then(data => {
                 if (data == 1) {
                     setFirebaseData("/control", "wifi", 0);
-                    document.getElementById("message2").style.color = "green";
-                    document.getElementById("message2").innerText = `WiFi: On`;
+                    document.getElementById("message2").style.color = "red";
+                    document.getElementById("message2").innerText = `WiFi: Off`;
                 }
                 else {
                     setFirebaseData("/control", "wifi", 1);
-                    document.getElementById("message2").style.color = "red";
-                    document.getElementById("message2").innerText = `WiFi: Off`;
+                    document.getElementById("message2").style.color = "green";
+                    document.getElementById("message2").innerText = `WiFi: On`;
                 }
             });
         }
