@@ -18,13 +18,17 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="index.html">Grain ATM</a>
-            <button title="hamburger" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button title="hamburger" class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.html">Control Panel</a>
+                        <a class="nav-link active" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="transaction.html">Transaction</a>
                     </li>
                 </ul>
             </div>
@@ -32,7 +36,11 @@
     </nav>
 
     <div class="container justify-content-center py-5">
-        <h1 class="text-center mb-4">Control Panel</h1>
+        <div class="container mb-4">
+            <div class="alert alert-info text-center fw-semibold" id="statusBar">
+                Checking machine status...
+            </div>
+        </div>        
 
         <div class="row g-4">
             <div class="col-md-6">
@@ -48,7 +56,7 @@
                 <div class="card shadow-sm text-center">
                     <div class="card-body">
                         <h4 class="card-title">Current Weight Of Grains Present</h4>
-                        <p class="fs-4 fw-bold text-dark" id="current_weight_of_grains_present"></p>
+                        <p class="fs-4 fw-bold" id="current_weight_of_grains_present"></p>
                     </div>
                 </div>
             </div>
@@ -61,15 +69,16 @@
                         <h4 class="card-title">Update Price</h4>
                         <input type="number" class="form-control my-3 text-center" placeholder="Enter Price Per Kg"
                             id="updatePriceInput">
-                        <label class="message">Enter A Value Between 0 To 325</label>
+                        <label class="message">Allowed Price Range: 0 to 325 ₹/Kg</label>
                         <button class="btn btn-dark w-100" onclick="update()">Update</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="container justify-content-center py-5">
-            <h1 class="text-center mb-4">Transaction History</h1>
+    <div class="container justify-content-center py-5">
+            <h1 class="text-center mb-4">Recent Transaction History</h1>
 
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -79,9 +88,9 @@
                                 <th>#</th>
                                 <th>Date</th>
                                 <th>Time</th>
-                                <th>Price (Rs / Kg)</th>
+                                <th>Price (₹ / Kg)</th>
                                 <th>Weight (Kg)</th>
-                                <th>Amount (Rs)</th>
+                                <th>Amount (₹)</th>
                             </tr>
                         </thead>
                         <tbody id="tb"></tbody>
@@ -90,47 +99,53 @@
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-            crossorigin="anonymous"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-        <script src="firebase.js"></script>
-        <script>
-            firebase.database().ref("/control/price").on("value", (snapshot) => {
-                document.getElementById("price").innerText = snapshot.val() + " ₹/Kg";
-            });
-
-            firebase.database().ref("/control/weight").on("value", (snapshot) => {
-                current_weight_of_grains_present = snapshot.val();
-                document.getElementById("current_weight_of_grains_present").innerText = current_weight_of_grains_present + " Kg";
-            });
-
-            function update() {
-                let val = parseInt(document.getElementById('updatePriceInput').value);
-                if (val <= 325) {
-                    setFirebaseData('/control', 'price', val);
-                    document.getElementById('updatePriceInput').value = '';
-                }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="firebase.js"></script>
+    <script>
+        firebase.database().ref("/control/wifi").on("value", (snapshot) => {
+            let data = snapshot.val();
+            if (data == 0){
+                document.getElementById("statusBar").innerText = "Machine Status: Offline";
+                document.getElementById("statusBar").style.background = "rgb(253, 150, 130)";
+                document.getElementById("statusBar").style.color = "rgb(255, 0, 0)";
             }
+            else if (data == 1){
+                document.getElementById("statusBar").innerText = "Machine Status: Online";
+                document.getElementById("statusBar").style.background = "#bbf7d0";
+                document.getElementById("statusBar").style.color = "#22c55e";
+            }            
+        });
+        
+        firebase.database().ref("/control/price").on("value", (snapshot) => {
+            document.getElementById("price").innerText = snapshot.val() + " ₹/Kg";
+        });
 
-            function add() {
-                let val = parseFloat(document.getElementById('updateAddInput').value);
-                if (val <= 5) {
-                    setFirebaseData('/control', 'weight', current_weight_of_grains_present + val)
-                    document.getElementById('updateAddInput').value = '';
-                }
+        firebase.database().ref("/control/weight").on("value", (snapshot) => {
+            current_weight_of_grains_present = snapshot.val();
+            document.getElementById("current_weight_of_grains_present").innerText = current_weight_of_grains_present + " Kg";
+            if (current_weight_of_grains_present >= 5){
+                document.getElementById("current_weight_of_grains_present").style.color = "rgb(13, 110, 253)";
             }
+            else{
+                document.getElementById("current_weight_of_grains_present").style.color = "rgb(255, 0, 0)";
+            }
+        });
 
-            firebase.database().ref("/transaction").on("value", (snapshot) => {
+        firebase.database().ref("/transaction").on("value", (snapshot) => {
             setTimeout(() => {
                 document.getElementById("tb").innerHTML = "";
 
                 let obj = snapshot.val()
                 let objKeys = Object.keys(obj);
                 let objLen = objKeys.length;
+                let index = objLen - 5;
                 let counter = 1;
-                for (let i = objLen; i >= 0; i--) {
+
+                for (let i = objLen; i >= index; i--) {
 
                     if (i != objLen) {
                         let data = obj[objKeys[i]];
@@ -139,16 +154,32 @@
                                                                         <td>${counter}</td>
                                                                         <td>${data["date"]}</td>
                                                                         <td>${data["time"]}</td>
-                                                                        <td>${data["amount"] / data["weight"]}</td>
-                                                                        <td>${data["weight"] / 100}</td>
-                                                                        <td>${data["amount"] / 100}</td>
+                                                                        <td>${data["amount"] / data["weight"]} ₹/Kg</td>
+                                                                        <td>${data["weight"] / 100} Kg</td>
+                                                                        <td>₹ ${data["amount"] / 100}</td>
                                                                     </tr>`;
                         counter++;
                     }
                 }
             }, 100);
         });
-        </script>
+
+        function update() {
+            let val = parseInt(document.getElementById('updatePriceInput').value);
+            if (val <= 325) {
+                setFirebaseData('/control', 'price', val);
+                document.getElementById('updatePriceInput').value = '';
+            }
+        }
+
+        function add() {
+            let val = parseFloat(document.getElementById('updateAddInput').value);
+            if (val <= 5) {
+                setFirebaseData('/control', 'weight', current_weight_of_grains_present + val)
+                document.getElementById('updateAddInput').value = '';
+            }
+        }
+    </script>
 </body>
 
 </html>
